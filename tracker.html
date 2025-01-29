@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Case Tracker Map</title>
+    <style>
+        body { background-color: black; margin: 0; overflow: hidden; color: white; font-family: Arial, sans-serif; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <canvas id="trackerCanvas"></canvas>
+    <script>
+        const canvas = document.getElementById("trackerCanvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const departments = [
+            { name: "MILLING", x: 200, y: 100, cases: 10 },
+            { name: "MODEL ROOM", x: 600, y: 80, cases: 12 },
+            { name: "DESIGN", x: 200, y: 250, cases: 8 },
+            { name: "3D PRINTING", x: 600, y: 250, cases: 6 },
+            { name: "SCANNING", x: 100, y: 400, cases: 9 },
+            { name: "FINISHING", x: 400, y: 350, cases: 14 },
+            { name: "CERAMICS", x: 400, y: 500, cases: 10 },
+            { name: "QUALITY CHECKED", x: 400, y: 650, cases: 7 }
+        ];
+
+        const statusColors = { "onTime": "green", "atRisk": "yellow", "late": "red" };
+        const caseData = [];
+
+        function drawMap() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = "white";
+            ctx.lineWidth = 2;
+            ctx.textAlign = "center";
+            ctx.font = "16px Arial";
+            
+            departments.forEach(dept => {
+                ctx.beginPath();
+                ctx.arc(dept.x, dept.y, 70, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.fillText(dept.name, dept.x, dept.y - 80);
+                
+                for (let j = 0; j < dept.cases; j++) {
+                    const angle = (j / dept.cases) * Math.PI * 2;
+                    const dotX = dept.x + Math.cos(angle) * 40;
+                    const dotY = dept.y + Math.sin(angle) * 40;
+                    const status = Object.keys(statusColors)[Math.floor(Math.random() * 3)];
+                    const caseNumber = Math.floor(100000 + Math.random() * 900000);
+                    const caseSummary = `Dr. Santiago\nPatient: Santiago\n4-unit bridge\n1st step on 1/17/25\nDue 2/07/25`;
+                    
+                    ctx.fillStyle = statusColors[status];
+                    ctx.beginPath();
+                    ctx.arc(dotX, dotY, 8, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    caseData.push({ x: dotX, y: dotY, caseNumber, status, caseSummary });
+                }
+            });
+        }
+
+        function handleClick(event) {
+            const rect = canvas.getBoundingClientRect();
+            const clickX = event.clientX - rect.left;
+            const clickY = event.clientY - rect.top;
+
+            caseData.forEach(dot => {
+                const distance = Math.sqrt((dot.x - clickX) ** 2 + (dot.y - clickY) ** 2);
+                if (distance < 10) {
+                    alert(`Case Number: ${dot.caseNumber}\nStatus: ${dot.status}\n${dot.caseSummary}`);
+                }
+            });
+        }
+
+        canvas.addEventListener("click", handleClick);
+        drawMap();
+    </script>
+</body>
+</html>
+
